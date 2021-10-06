@@ -1,0 +1,21 @@
+-- this flag tells Kafka where to start reading offsets.
+set 'auto.offset.reset'='earliest';
+
+-- define iiot_simulated stream
+create stream iiot_simulated 
+  ( reg_num varchar key,
+    payload STRUCT<reg_num VARCHAR, city varchar, owner varchar, lat double, lon double>
+ ) WITH (KAFKA_TOPIC='iiot.simulated',
+        VALUE_FORMAT='JSON'
+        );
+
+-- capture iiot_simulated_mongodb for mongodb
+CREATE OR REPLACE STREAM iiot_simulated_mongodb 
+  AS SELECT 
+     reg_num AS reg_num,
+     payload -> city AS city,
+     payload -> owner AS owner,
+     payload -> lat AS lat,
+     payload -> lon AS lon,
+     TIMESTAMPTOSTRING(rowtime, 'yyyy-MM-dd''T''HH:mm:ss.SSSX', 'UTC') AS iiot_ts
+FROM iiot_simulated;
