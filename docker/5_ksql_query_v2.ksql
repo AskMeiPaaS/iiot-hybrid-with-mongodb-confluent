@@ -19,3 +19,13 @@ CREATE OR REPLACE STREAM iiot_simulated_mongodb
      payload -> lon AS lon,
      TIMESTAMPTOSTRING(rowtime, 'yyyy-MM-dd''T''HH:mm:ss.SSSX', 'UTC') AS iiot_ts
 FROM iiot_simulated;
+
+-- create an atlas feed
+CREATE STREAM iiot_simulated_realm 
+  AS SELECT
+    m.reg_num as veh_num, 
+    TIMESTAMPTOSTRING(rowtime, 'yyyy-MM-dd''T''HH:mm:ss.SSS', 'UTC') AS ts,
+    m.city as city,
+    STRUCT("0" := m.lat, "1" := m.lon) AS location,
+    m.owner as owner
+  FROM iiot_simulated_mongodb m;
